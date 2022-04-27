@@ -12,6 +12,7 @@ function doInit () {
     180000,
     300000,
     600000,
+    900000,
     1200000,
     1800000,
     3600000
@@ -22,11 +23,12 @@ function doInit () {
     "3",
     "5",
     "10",
+    "15",
     "20",
     "30",
     "60"
     ]
-    IxInteval = 0
+    IxInteval = 5
     MillisecondsBetweenDrink = list[IxInteval]
 }
 input.onButtonPressed(Button.A, function () {
@@ -46,6 +48,9 @@ function StopAlert () {
     InDrinkMode = false
     basic.showIcon(IconNames.Heart)
 }
+input.onSound(DetectedSound.Loud, function () {
+	
+})
 input.onButtonPressed(Button.AB, function () {
     led.stopAnimation()
     if (DoRun) {
@@ -83,7 +88,9 @@ serial.redirectToUSB()
 loops.everyInterval(500, function () {
     if (DoRun) {
         if (InDrinkMode) {
+            music.setVolume(Math.max(input.soundLevel(), 30))
             if (AlertCount < 2) {
+                music.setVolume(Math.max(input.soundLevel(), 30))
                 soundExpression.giggle.play()
                 basic.showIcon(IconNames.Happy)
             } else {
