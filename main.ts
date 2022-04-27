@@ -1,3 +1,34 @@
+function doInit () {
+    led.setBrightness(10)
+    DoRun = false
+    music.setVolume(31)
+    StartTime = control.millis()
+    InDrinkMode = false
+    ReferenceTemp = input.temperature()
+    AlertCount = 0
+    list = [
+    10000,
+    60000,
+    180000,
+    300000,
+    600000,
+    1200000,
+    1800000,
+    3600000
+    ]
+    text_list = [
+    "T",
+    "1",
+    "3",
+    "5",
+    "10",
+    "20",
+    "30",
+    "60"
+    ]
+    IxInteval = 0
+    MillisecondsBetweenDrink = list[IxInteval]
+}
 input.onButtonPressed(Button.A, function () {
     led.stopAnimation()
     basic.clearScreen()
@@ -8,26 +39,13 @@ input.onButtonPressed(Button.A, function () {
         }
     }
 })
-input.onGesture(Gesture.ScreenUp, function () {
-    if (DoRun) {
-        StopAlert()
-    }
-})
 function StopAlert () {
     music.stopAllSounds()
-    for (let index = 0; index < 4; index++) {
-        basic.showIcon(IconNames.Heart)
-        basic.pause(200)
-        basic.clearScreen()
-    }
+    AlertCount = 0
     StartTime = control.millis()
     InDrinkMode = false
+    basic.showIcon(IconNames.Heart)
 }
-input.onGesture(Gesture.ScreenDown, function () {
-    if (DoRun) {
-        StopAlert()
-    }
-})
 input.onButtonPressed(Button.AB, function () {
     led.stopAnimation()
     if (DoRun) {
@@ -42,46 +60,44 @@ input.onButtonPressed(Button.B, function () {
     basic.clearScreen()
     if (!(DoRun)) {
         DoRun = false
-        if (IxInteval < 5) {
+        if (IxInteval < list.length) {
             IxInteval += 1
         }
     }
 })
+let AksX = 0
+let Temperature = 0
 let MillisecondsSinceLastDrink = 0
+let MillisecondsBetweenDrink = 0
 let IxInteval = 0
+let text_list: string[] = []
+let list: number[] = []
+let AlertCount = 0
+let ReferenceTemp = 0
 let InDrinkMode = false
 let StartTime = 0
 let DoRun = false
-led.setBrightness(10)
-DoRun = false
+doInit()
 basic.showIcon(IconNames.No)
-music.setVolume(31)
-StartTime = control.millis()
-InDrinkMode = false
-let ReferenceTemp = input.temperature()
-let list = [
-60000,
-300000,
-600000,
-1200000,
-1800000,
-3600000
-]
-let text_list = [
-"1",
-"Kaffe",
-"10",
-"20",
-"30",
-"60"
-]
-IxInteval = 0
-let MillisecondsBetweenDrink = list[IxInteval]
-loops.everyInterval(1000, function () {
+serial.redirectToUSB()
+loops.everyInterval(500, function () {
     if (DoRun) {
-        led.stopAnimation()
         if (InDrinkMode) {
-            soundExpression.giggle.playUntilDone()
+            if (AlertCount < 2) {
+                soundExpression.giggle.play()
+                basic.showIcon(IconNames.Happy)
+            } else {
+                basic.showIcon(IconNames.Happy)
+                basic.pause(200)
+                basic.clearScreen()
+            }
+            AlertCount += 1
+        }
+        if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > 30) {
+            basic.pause(100)
+            if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > 30) {
+                StopAlert()
+            }
         }
     } else {
         basic.showString("" + (text_list[IxInteval]))
@@ -92,17 +108,20 @@ basic.forever(function () {
         MillisecondsBetweenDrink = list[IxInteval]
         if (!(InDrinkMode)) {
             MillisecondsSinceLastDrink = control.millis() - StartTime
-            led.plotBarGraph(
-            MillisecondsBetweenDrink - MillisecondsSinceLastDrink,
-            MillisecondsBetweenDrink
-            )
+            if (MillisecondsSinceLastDrink > 2000) {
+                led.plotBarGraph(
+                MillisecondsBetweenDrink - MillisecondsSinceLastDrink,
+                MillisecondsBetweenDrink
+                )
+            }
             if (MillisecondsSinceLastDrink > MillisecondsBetweenDrink) {
                 InDrinkMode = true
-                basic.showIcon(IconNames.Happy)
             }
         }
         basic.pause(1000)
-    } else {
-    	
+        Temperature = input.temperature()
+        serial.writeValue("Temp", Temperature)
+        AksX = input.acceleration(Dimension.Strength)
+        serial.writeValue("AksX", AksX)
     }
 })
