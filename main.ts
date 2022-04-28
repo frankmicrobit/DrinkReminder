@@ -48,9 +48,6 @@ function StopAlert () {
     InDrinkMode = false
     basic.showIcon(IconNames.Heart)
 }
-input.onSound(DetectedSound.Loud, function () {
-	
-})
 input.onButtonPressed(Button.AB, function () {
     led.stopAnimation()
     if (DoRun) {
@@ -88,12 +85,15 @@ serial.redirectToUSB()
 loops.everyInterval(500, function () {
     if (DoRun) {
         if (InDrinkMode) {
-            music.setVolume(Math.max(input.soundLevel(), 30))
             if (AlertCount < 2) {
-                music.setVolume(Math.max(input.soundLevel(), 30))
+                music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
                 soundExpression.giggle.play()
                 basic.showIcon(IconNames.Happy)
             } else {
+                if (AlertCount < 1000 && AlertCount % 200 == 0) {
+                    music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
+                    soundExpression.giggle.play()
+                }
                 basic.showIcon(IconNames.Happy)
                 basic.pause(200)
                 basic.clearScreen()
