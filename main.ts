@@ -31,6 +31,10 @@ function doInit () {
     IxInteval = 5
     MillisecondsBetweenDrink = list[IxInteval]
 }
+function doAlarm () {
+    music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
+    soundExpression.giggle.play()
+}
 input.onButtonPressed(Button.A, function () {
     led.stopAnimation()
     basic.clearScreen()
@@ -86,13 +90,11 @@ loops.everyInterval(500, function () {
     if (DoRun) {
         if (InDrinkMode) {
             if (AlertCount < 2) {
-                music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
-                soundExpression.giggle.play()
+                doAlarm()
                 basic.showIcon(IconNames.Happy)
             } else {
                 if (AlertCount < 1000 && AlertCount % 200 == 0) {
-                    music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
-                    soundExpression.giggle.play()
+                    doAlarm()
                 }
                 basic.showIcon(IconNames.Happy)
                 basic.pause(200)
