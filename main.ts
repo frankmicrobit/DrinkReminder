@@ -1,5 +1,7 @@
 function doInit () {
     led.setBrightness(10)
+    TravelMode = false
+    MovementThreshold = 30
     DoRun = false
     music.setVolume(31)
     StartTime = control.millis()
@@ -43,6 +45,13 @@ input.onButtonPressed(Button.A, function () {
         if (IxInteval > 0) {
             IxInteval += -1
         }
+    } else {
+        TravelMode = !(TravelMode)
+        if (TravelMode) {
+            basic.showIcon(IconNames.Rollerskate)
+        } else {
+            basic.showIcon(IconNames.Snake)
+        }
     }
 })
 function StopAlert () {
@@ -52,6 +61,11 @@ function StopAlert () {
     InDrinkMode = false
     basic.showIcon(IconNames.Heart)
 }
+input.onGesture(Gesture.ScreenDown, function () {
+    if (TravelMode) {
+        StopAlert()
+    }
+})
 input.onButtonPressed(Button.AB, function () {
     led.stopAnimation()
     if (DoRun) {
@@ -83,6 +97,8 @@ let ReferenceTemp = 0
 let InDrinkMode = false
 let StartTime = 0
 let DoRun = false
+let MovementThreshold = 0
+let TravelMode = false
 doInit()
 basic.showIcon(IconNames.No)
 serial.redirectToUSB()
@@ -96,16 +112,22 @@ loops.everyInterval(500, function () {
                 if (AlertCount < 1000 && AlertCount % 200 == 0) {
                     doAlarm()
                 }
-                basic.showIcon(IconNames.Happy)
+                if (AlertCount < 1000) {
+                    basic.showIcon(IconNames.Happy)
+                } else {
+                    basic.showIcon(IconNames.Sad)
+                }
                 basic.pause(200)
                 basic.clearScreen()
             }
             AlertCount += 1
         }
-        if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > 30) {
-            basic.pause(100)
-            if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > 30) {
-                StopAlert()
+        if (!(TravelMode)) {
+            if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > MovementThreshold) {
+                basic.pause(100)
+                if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > MovementThreshold) {
+                    StopAlert()
+                }
             }
         }
     } else {
