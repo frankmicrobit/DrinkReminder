@@ -135,7 +135,7 @@ loops.everyInterval(500, function () {
     }
 })
 basic.forever(function () {
-    led.setBrightness(input.lightLevel())
+    led.setBrightness(Math.max(input.lightLevel(), 15))
     if (DoRun) {
         MillisecondsBetweenDrink = list[IxInteval]
         if (!(InDrinkMode)) {
