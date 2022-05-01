@@ -34,7 +34,7 @@ function doInit () {
     MillisecondsBetweenDrink = list[IxInteval]
 }
 function doAlarm () {
-    music.setVolume(Math.constrain(input.soundLevel() * 4, 30, 255))
+    music.setVolume(Math.constrain(0, 0, 0))
     soundExpression.giggle.play()
 }
 input.onButtonPressed(Button.A, function () {
@@ -54,6 +54,11 @@ input.onButtonPressed(Button.A, function () {
         }
     }
 })
+input.onGesture(Gesture.ScreenDown, function () {
+    if (TravelMode) {
+        StopAlert()
+    }
+})
 function StopAlert () {
     music.stopAllSounds()
     AlertCount = 0
@@ -61,11 +66,6 @@ function StopAlert () {
     InDrinkMode = false
     basic.showIcon(IconNames.Heart)
 }
-input.onGesture(Gesture.ScreenDown, function () {
-    if (TravelMode) {
-        StopAlert()
-    }
-})
 input.onButtonPressed(Button.AB, function () {
     led.stopAnimation()
     if (DoRun) {
@@ -135,6 +135,7 @@ loops.everyInterval(500, function () {
     }
 })
 basic.forever(function () {
+    led.setBrightness(input.lightLevel())
     if (DoRun) {
         MillisecondsBetweenDrink = list[IxInteval]
         if (!(InDrinkMode)) {
