@@ -76,15 +76,13 @@ function doSetSoundStyle (Style: number) {
 function doInit () {
     led.setBrightness(10)
     TravelMode = false
-    MovementThreshold = 30
+    MovementThreshold = 60
     DoRun = false
     SoundStyle = 2
-    music.setVolume(31)
     StartTime = control.millis()
     InDrinkMode = false
-    ReferenceTemp = input.temperature()
     AlertCount = 0
-    list = [
+    list_value = [
     10000,
     60000,
     180000,
@@ -95,7 +93,7 @@ function doInit () {
     1800000,
     3600000
     ]
-    text_list = [
+    list_text = [
     "T",
     "1",
     "3",
@@ -106,8 +104,8 @@ function doInit () {
     "30",
     "60"
     ]
-    IxInteval = 5
-    MillisecondsBetweenDrink = list[IxInteval]
+    IxInteval = 4
+    MillisecondsBetweenDrink = list_value[IxInteval]
 }
 function doAlarm () {
     SoundLevel = Math.constrain(input.soundLevel() * 4, SoundLow, SoundHigh)
@@ -118,9 +116,10 @@ input.onButtonPressed(Button.A, function () {
     led.stopAnimation()
     basic.clearScreen()
     if (!(DoRun)) {
-        DoRun = false
-        if (IxInteval > 0) {
-            IxInteval += -1
+        if (IxInteval < list_value.length - 1) {
+            IxInteval += 1
+        } else {
+            IxInteval = 0
         }
     } else {
         TravelMode = !(TravelMode)
@@ -130,6 +129,11 @@ input.onButtonPressed(Button.A, function () {
             basic.showIcon(IconNames.Snake)
         }
         StartTime = control.millis()
+    }
+})
+input.onGesture(Gesture.ScreenUp, function () {
+    if (TravelMode) {
+        StopAlert()
     }
 })
 function StopAlert () {
@@ -158,28 +162,24 @@ input.onButtonPressed(Button.AB, function () {
 input.onButtonPressed(Button.B, function () {
     led.stopAnimation()
     basic.clearScreen()
+    StartTime = control.millis()
     if (!(DoRun)) {
-        DoRun = false
-        if (IxInteval < list.length) {
-            IxInteval += 1
-        }
+    	
     } else {
         SoundStyle += 1
         if (SoundStyle > 5) {
             SoundStyle = 0
         }
-        StartTime = control.millis()
-        doSetSoundStyle(SoundStyle)
     }
+    doSetSoundStyle(SoundStyle)
 })
 let MillisecondsSinceLastDrink = 0
 let SoundLevel = 0
 let MillisecondsBetweenDrink = 0
 let IxInteval = 0
-let text_list: string[] = []
-let list: number[] = []
+let list_text: string[] = []
+let list_value: number[] = []
 let AlertCount = 0
-let ReferenceTemp = 0
 let InDrinkMode = false
 let StartTime = 0
 let SoundStyle = 0
@@ -222,13 +222,13 @@ loops.everyInterval(500, function () {
             }
         }
     } else {
-        basic.showString("" + (text_list[IxInteval]))
+        basic.showString("" + (list_text[IxInteval]))
     }
 })
 basic.forever(function () {
     led.setBrightness(Math.max(input.lightLevel(), 15))
     if (DoRun) {
-        MillisecondsBetweenDrink = list[IxInteval]
+        MillisecondsBetweenDrink = list_value[IxInteval]
         if (!(InDrinkMode)) {
             MillisecondsSinceLastDrink = control.millis() - StartTime
             if (MillisecondsSinceLastDrink > 2000) {
