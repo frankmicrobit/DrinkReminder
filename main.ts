@@ -74,6 +74,8 @@ function doSetSoundStyle (Style: number) {
     }
 }
 function doInit () {
+    power.fullPowerOn(FullPowerSource.A)
+    InStandbyMode = false
     led.setBrightness(10)
     TravelMode = false
     MovementThreshold = 60
@@ -108,6 +110,7 @@ function doInit () {
     MillisecondsBetweenDrink = list_value[IxInteval]
 }
 function doAlarm () {
+    // Set alarm volume based on mode and ambisound
     SoundLevel = Math.constrain(input.soundLevel() * 4, SoundLow, SoundHigh)
     music.setVolume(SoundLevel)
     soundExpression.giggle.play()
@@ -115,22 +118,33 @@ function doAlarm () {
 input.onButtonPressed(Button.A, function () {
     led.stopAnimation()
     basic.clearScreen()
-    if (!(DoRun)) {
-        if (IxInteval < list_value.length - 1) {
-            IxInteval += 1
+    if (!(InStandbyMode)) {
+        if (!(DoRun)) {
+            if (IxInteval < list_value.length - 1) {
+                IxInteval += 1
+            } else {
+                IxInteval = 0
+            }
         } else {
-            IxInteval = 0
-        }
-    } else {
-        TravelMode = !(TravelMode)
-        if (TravelMode) {
-            basic.showIcon(IconNames.Rollerskate)
-        } else {
-            basic.showIcon(IconNames.Snake)
+            TravelMode = !(TravelMode)
+            if (TravelMode) {
+                basic.showIcon(IconNames.Rollerskate)
+            } else {
+                basic.showIcon(IconNames.Snake)
+            }
         }
         StartTime = control.millis()
+    } else {
+        InStandbyMode = false
+        StopAlert()
     }
 })
+function doSleepMode () {
+    basic.pause(2000)
+    StopAlert()
+    InStandbyMode = true
+    power.lowPowerRequest(LowPowerMode.Continue)
+}
 input.onGesture(Gesture.ScreenUp, function () {
     if (TravelMode) {
         StopAlert()
@@ -151,13 +165,18 @@ input.onGesture(Gesture.ScreenDown, function () {
     }
 })
 input.onButtonPressed(Button.AB, function () {
-    led.stopAnimation()
-    if (DoRun) {
-        basic.showIcon(IconNames.No)
+    if (!(InStandbyMode)) {
+        led.stopAnimation()
+        if (DoRun) {
+            basic.showIcon(IconNames.No)
+        } else {
+            StopAlert()
+        }
+        DoRun = !(DoRun)
     } else {
+        InStandbyMode = false
         StopAlert()
     }
-    DoRun = !(DoRun)
 })
 input.onButtonPressed(Button.B, function () {
     led.stopAnimation()
@@ -186,9 +205,11 @@ let SoundStyle = 0
 let DoRun = false
 let MovementThreshold = 0
 let TravelMode = false
+let InStandbyMode = false
 let SoundHigh = 0
 let SoundLow = 0
 doInit()
+power.lowPowerEnable(LowPowerEnable.Allow)
 basic.showIcon(IconNames.No)
 serial.redirectToUSB()
 loops.everyInterval(500, function () {
@@ -207,6 +228,9 @@ loops.everyInterval(500, function () {
                     basic.showIcon(IconNames.Happy)
                 } else {
                     basic.showIcon(IconNames.Sad)
+                    if (AlertCount > 14000) {
+                        doSleepMode()
+                    }
                 }
                 basic.pause(200)
                 basic.clearScreen()
@@ -226,7 +250,7 @@ loops.everyInterval(500, function () {
     }
 })
 basic.forever(function () {
-    led.setBrightness(Math.max(input.lightLevel(), 15))
+    led.setBrightness(Math.max(input.lightLevel(), 10))
     if (DoRun) {
         MillisecondsBetweenDrink = list_value[IxInteval]
         if (!(InDrinkMode)) {
