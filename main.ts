@@ -211,7 +211,6 @@ let SoundLow = 0
 doInit()
 power.lowPowerEnable(LowPowerEnable.Allow)
 basic.showIcon(IconNames.No)
-serial.redirectToUSB()
 loops.everyInterval(500, function () {
     if (DoRun) {
         if (InDrinkMode) {
