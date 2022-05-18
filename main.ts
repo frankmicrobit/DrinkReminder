@@ -107,6 +107,7 @@ function doInit () {
     "30",
     "60"
     ]
+    DoDisplayIntervalCount = 0
     IxInteval = 4
     MillisecondsBetweenDrink = list_value[IxInteval]
 }
@@ -126,6 +127,7 @@ input.onButtonPressed(Button.A, function () {
             } else {
                 IxInteval = 0
             }
+            DoDisplayIntervalCount = 0
         } else {
             TravelMode = !(TravelMode)
             if (TravelMode) {
@@ -174,6 +176,7 @@ input.onButtonPressed(Button.AB, function () {
             StopAlert()
         }
         DoRun = !(DoRun)
+        DoDisplayIntervalCount = 0
     } else {
         InStandbyMode = false
         StopAlert()
@@ -197,6 +200,7 @@ let MillisecondsSinceLastDrink = 0
 let SoundLevel = 0
 let MillisecondsBetweenDrink = 0
 let IxInteval = 0
+let DoDisplayIntervalCount = 0
 let list_text: string[] = []
 let list_value: number[] = []
 let AlertCount = 0
@@ -227,7 +231,13 @@ loops.everyInterval(500, function () {
                 if (AlertCount < 1000) {
                     basic.showIcon(IconNames.Happy)
                 } else {
-                    basic.showIcon(IconNames.Sad)
+                    basic.showLeds(`
+                        . . . . .
+                        . # . # .
+                        . . . . .
+                        # # # # #
+                        . . . . .
+                        `)
                     if (AlertCount > 14000) {
                         doSleepMode()
                     }
@@ -246,7 +256,12 @@ loops.everyInterval(500, function () {
             }
         }
     } else {
-        basic.showString("" + (list_text[IxInteval]))
+        if (DoDisplayIntervalCount < 3) {
+            DoDisplayIntervalCount += 1
+            basic.showString("" + (list_text[IxInteval]))
+        } else {
+            basic.clearScreen()
+        }
     }
 })
 basic.forever(function () {
@@ -260,11 +275,13 @@ basic.forever(function () {
                 MillisecondsBetweenDrink - MillisecondsSinceLastDrink,
                 MillisecondsBetweenDrink
                 )
+                MovementThreshold = 100
             } else {
                 basic.showIcon(IconNames.Heart)
             }
             if (MillisecondsSinceLastDrink > MillisecondsBetweenDrink) {
                 InDrinkMode = true
+                MovementThreshold = 30
             }
         }
         basic.pause(1000)
