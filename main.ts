@@ -14,8 +14,8 @@ function doSetSoundStyle (Style: number) {
     }
     // Normal
     if (Style == 1) {
-        SoundLow = 10
-        SoundHigh = 127
+        SoundLow = 5
+        SoundHigh = 5
         basic.showLeds(`
             . # . . .
             . # # . .
@@ -26,7 +26,7 @@ function doSetSoundStyle (Style: number) {
     }
     // Normal
     if (Style == 2) {
-        SoundLow = 40
+        SoundLow = 20
         SoundHigh = 255
         basic.showLeds(`
             . # . . .
@@ -112,10 +112,17 @@ function doInit () {
     MillisecondsBetweenDrink = list_value[IxInteval]
 }
 function doAlarm () {
-    // Set alarm volume based on mode and ambisound
-    SoundLevel = Math.constrain(input.soundLevel() * 4, SoundLow, SoundHigh)
-    music.setVolume(SoundLevel)
+    if (SoundStyle > 1) {
+        // Set alarm volume based on mode and ambisound
+        SoundLevel = Math.constrain(input.soundLevel() * 4, SoundLow, SoundHigh)
+        music.setVolume(SoundLevel)
+    } else {
+        // Set alarm volume to lw value
+        SoundLevel = SoundLow
+        music.setVolume(SoundLevel)
+    }
     soundExpression.giggle.play()
+    basic.pause(1000)
 }
 input.onButtonPressed(Button.A, function () {
     led.stopAnimation()
