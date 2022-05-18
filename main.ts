@@ -260,6 +260,8 @@ basic.forever(function () {
                 MillisecondsBetweenDrink - MillisecondsSinceLastDrink,
                 MillisecondsBetweenDrink
                 )
+            } else {
+                basic.showIcon(IconNames.Heart)
             }
             if (MillisecondsSinceLastDrink > MillisecondsBetweenDrink) {
                 InDrinkMode = true
