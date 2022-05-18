@@ -78,9 +78,10 @@ function doInit () {
     InStandbyMode = false
     led.setBrightness(10)
     TravelMode = false
-    MovementThreshold = 60
+    MovementThreshold = 30
     DoRun = false
     SoundStyle = 2
+    doSetSoundStyle(SoundStyle)
     StartTime = control.millis()
     InDrinkMode = false
     AlertCount = 0
