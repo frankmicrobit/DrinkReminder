@@ -97,7 +97,7 @@ function doInit () {
     3600000
     ]
     list_text = [
-    "T",
+    "0",
     "1",
     "3",
     "5",
@@ -166,6 +166,43 @@ function StopAlert () {
     MovementThreshold = 100
     if (MillisecondsSinceLastDrink > 2000) {
         basic.showIcon(IconNames.Heart)
+    }
+}
+function PlotDigit (Digit: number, Offset: number) {
+    if (Digit != 1) {
+        led.plot(0 + Offset, 0)
+    }
+    if (Digit != 2 && Digit != 3 && Digit != 7) {
+        led.plot(0 + Offset, 1)
+    }
+    if (Digit == 0 || Digit == 2 || Digit == 3 || Digit == 4 || Digit == 5 || Digit == 6) {
+        led.plot(0 + Offset, 2)
+    }
+    if (Digit == 0 || Digit == 2 || Digit == 6 || Digit == 8) {
+        led.plot(0 + Offset, 3)
+    }
+    if (Digit == 0 || Digit == 2 || Digit == 3 || Digit == 5 || Digit == 6 || Digit == 8) {
+        led.plot(0 + Offset, 4)
+    }
+    if (Digit != 4 && Digit != 6) {
+        led.plot(1 + Offset, 0)
+    }
+    if (Digit != 4 && Digit != 5 && Digit != 6) {
+        led.plot(1 + Offset, 1)
+    }
+    led.plot(1 + Offset, 2)
+    if (Digit != 2) {
+        led.plot(1 + Offset, 3)
+    }
+    led.plot(1 + Offset, 4)
+}
+function DisplayNumber(num: number) {
+    basic.clearScreen()
+    if (num > 9) {
+        PlotDigit(Math.trunc(num / 10), 0)
+        PlotDigit(num % 10, 3)
+    } else {
+        PlotDigit(num % 10, 2)
     }
 }
 input.onGesture(Gesture.ScreenDown, function () {
@@ -268,7 +305,7 @@ loops.everyInterval(500, function () {
         if (DoDisplayIntervalCount < 3) {
             DoDisplayIntervalCount += 1
             basic.clearScreen()
-            basic.showString("" + (list_text[IxInteval]))
+            DisplayNumber(parseFloat(list_text[IxInteval]))
         } else {
             basic.clearScreen()
         }
