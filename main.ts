@@ -156,23 +156,20 @@ function doSleepMode () {
     power.lowPowerRequest(LowPowerMode.Continue)
 }
 input.onGesture(Gesture.ScreenUp, function () {
-    if (TravelMode) {
-        StopAlert()
-    }
+    StopAlert()
 })
 function StopAlert () {
     music.stopAllSounds()
     AlertCount = 0
     StartTime = control.millis()
     InDrinkMode = false
+    MovementThreshold = 100
     if (MillisecondsSinceLastDrink > 2000) {
         basic.showIcon(IconNames.Heart)
     }
 }
 input.onGesture(Gesture.ScreenDown, function () {
-    if (TravelMode) {
-        StopAlert()
-    }
+    StopAlert()
 })
 input.onButtonPressed(Button.AB, function () {
     if (!(InStandbyMode)) {
@@ -215,14 +212,16 @@ let InDrinkMode = false
 let StartTime = 0
 let SoundStyle = 0
 let DoRun = false
-let MovementThreshold = 0
 let TravelMode = false
 let InStandbyMode = false
 let SoundHigh = 0
 let SoundLow = 0
+let MovementThreshold = 0
 doInit()
 power.lowPowerEnable(LowPowerEnable.Allow)
 basic.showIcon(IconNames.No)
+music.setBuiltInSpeakerEnabled(true)
+MovementThreshold = 100
 loops.everyInterval(500, function () {
     if (DoRun) {
         if (InDrinkMode) {
@@ -258,6 +257,9 @@ loops.everyInterval(500, function () {
             if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > MovementThreshold) {
                 basic.pause(100)
                 if (Math.abs(1024 - input.acceleration(Dimension.Strength)) > MovementThreshold) {
+                    led.plot(0, 0)
+                    basic.pause(200)
+                    led.unplot(0, 0)
                     StopAlert()
                 }
             }
@@ -265,6 +267,7 @@ loops.everyInterval(500, function () {
     } else {
         if (DoDisplayIntervalCount < 3) {
             DoDisplayIntervalCount += 1
+            basic.clearScreen()
             basic.showString("" + (list_text[IxInteval]))
         } else {
             basic.clearScreen()
@@ -288,7 +291,7 @@ basic.forever(function () {
             }
             if (MillisecondsSinceLastDrink > MillisecondsBetweenDrink) {
                 InDrinkMode = true
-                MovementThreshold = 30
+                MovementThreshold = 50
             }
         }
         basic.pause(1000)
